@@ -20,16 +20,14 @@ fs.readdirSync(modelsPath).forEach(function (file) {
   require(modelsPath + '/' + file)
 })
 
-console.log('Watching repo at %s ...', commander.repo);
-chokidar.watch(commander.repo, {ignored: /node_modules/, persistent: true}).on('all', reactToChange);
-
+// start watching files when we've connected to the mongo db.
+mongodb.connection.once("open", function() {
+	console.log('Watching repo at %s ...', commander.repo);
+	chokidar.watch(commander.repo, {ignored: /node_modules/, persistent: true}).on('all', reactToChange);
+})
 
 function reactToChange(event, path, stats) {
-	
-	console.log(event);
-
-	// Build new collection
-
+	// console.log(event);
 }
 
 
