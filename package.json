@@ -1,31 +1,36 @@
 {
-  "name": "repowatch",
-  "version": "0.0.0",
-  "description": "Repository (GIT, SVN, etc.) live change and diff notification service",
-  "main": "repowatch.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/joshjung/repowatch.git"
-  },
-  "keywords": [
-    "GIT",
-    "SVN",
-    "watcher",
-    "watch",
-    "repo",
-    "repository",
-    "version",
-    "control"
-  ],
-  "author": "Joshua and Joseph Jung",
-  "license": "BSD",
-  "bugs": {
-    "url": "https://github.com/joshjung/repowatch/issues"
-  },
-  "dependencies": {
-    "chokidar": "~0.8.2",
-    "commander": "~2.2.0",
-    "mongoose": "~3.8.10",
-    "async": "~0.9.0"
-  }
+    "name": "repowatch",
+    "preferGlobal": true,
+    "version": "0.0.2",
+    "description": "Repository (GIT, SVN, etc.) live change and diff notification service",
+    "main": "repowatch.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/joshjung/repowatch.git"
+    },
+    "keywords": [
+        "GIT",
+        "SVN",
+        "watcher",
+        "watch",
+        "repo",
+        "repository",
+        "version",
+        "control"
+    ],
+    "author": "Joshua and Joseph Jung",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/joshjung/repowatch/issues"
+    },
+    "dependencies": {
+        "chokidar": "~0.8.2",
+        "commander": "~2.2.0",
+        "mongoose": "~3.8.10",
+        "async": "~0.9.0"
+    },
+    "main": "./repowatch.js",
+    "bin": {
+        "repowatch": "./repowatch.js"
+    }
 }
