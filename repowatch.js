@@ -1,4 +1,5 @@
 var versionInfo = require('./package.json'),
+	path = require('path'),
 	chokidar = require('chokidar'),
  	commander = require('commander'),
  	mongoose = require('mongoose'),
@@ -29,7 +30,7 @@ mongodb.connection.once("open", function() {
 		if (err) console.log(err);
 		else {
 			if (repo) {
-				chokidar.watch(__dirname, {persistent: true}).on('all', reactToChange);
+				chokidar.watch(__dirname, {ignored : /.+\.git.+/, persistent: true}).on('all', reactToChange);
 			}
 			else {
 				var currentRepo = new Repo({ 'name' : commander.repo }).save(function(err, repo) {
@@ -43,11 +44,18 @@ mongodb.connection.once("open", function() {
 
 
 // executed anytime a new file has been changed/create1d/deleted
-function reactToChange(event, path, stats) {
+function reactToChange(event, _path, stats) {
 	
 	//diff file, if different, set flag to "isEdited";
 
-	Repo.update({ 'name': commander.repo }, {$push : {files : {isEdited : true, name: path}}}, function(err) {
+	console.log(_path)
+
+	// convert full path (Users\baseDir\myFile.js) to (\baseDir\myFile.js)... 
+	_path = _path.replace(new RegExp('(' + (__dirname.replace( /\//g, '\\/')) + ')', 'g'), "");
+
+	console.log(_path)
+
+	Repo.update({ 'name': commander.repo }, {$push : {files : {isEdited : false, name: _path}}}, function(err) {
 		if (err) console.log(err);
 	})
 
