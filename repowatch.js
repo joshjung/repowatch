@@ -44,10 +44,13 @@ mongodb.connection.once("open", function() {
 
 // executed anytime a new file has been changed/create1d/deleted
 function reactToChange(event, path, stats) {
-	Repo.findOne( { 'name': commander.repo } , function(err, repo) {
-		console.log(repo)
+	
+	//diff file, if different, set flag to "isEdited";
+
+	Repo.update({ 'name': commander.repo }, {$push : {files : {isEdited : true, name: path}}}, function(err) {
+		if (err) console.log(err);
 	})
-	Repo.update({ 'name': commander.repo }, {$set : {"isEdited" : true}})
+
 }
 
 
