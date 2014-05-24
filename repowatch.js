@@ -20,9 +20,6 @@ if (!commander.repo) {
 	process.kill(process.pid);
 }
 
-// the _id of the document we are dealing with.
-var workingRepo = null;
-
 // start watching files when we've connected to the mongo db.
 mongodb.connection.once("open", function() {
 
