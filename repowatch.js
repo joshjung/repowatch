@@ -1,9 +1,9 @@
 var versionInfo = require('./package.json'),
 	path = require('path'),
 	chokidar = require('chokidar'),
- 	commander = require('commander'),
- 	mongoose = require('mongoose'),
- 	mongodb = require('./lib/db').db;
+	commander = require('commander'),
+	mongoose = require('mongoose'),
+	mongodb = require('./lib/db').db;
 
 require('./lib/models/repo.js');
 
@@ -16,7 +16,7 @@ commander
 var Repo = null;
 
 // require the repo option
-if (!commander.repo) { 
+if (!commander.repo) {
 	console.log("repo name must be specified.  user -r [repoName];");
 	process.kill(process.pid);
 }
@@ -26,35 +26,50 @@ mongodb.connection.once("open", function() {
 
 	Repo = mongoose.model("Repo");
 
-	Repo.findOne({ 'name': commander.repo }, function(err, repo) {
+	Repo.findOne({
+		'name': commander.repo
+	}, function(err, repo) {
 		if (err) console.log(err);
 		else {
 			if (repo) {
-				chokidar.watch(__dirname, {ignored: /[\/\\]\./, persistent: true}).on('all', reactToChange);
-			}
-			else {
-				var currentRepo = new Repo({ 'name' : commander.repo }).save(function(err, repo) {
-					chokidar.watch(__dirname, {ignored: /[\/\\]\./, persistent: true}).on('all', reactToChange);
+				chokidar.watch(__dirname, {
+					ignored: /[\/\\]\./,
+					persistent: true
+				}).on('all', reactToChange);
+			} else {
+				var currentRepo = new Repo({
+					'name': commander.repo
+				}).save(function(err, repo) {
+					chokidar.watch(__dirname, {
+						ignored: /[\/\\]\./,
+						persistent: true
+					}).on('all', reactToChange);
 				});
 			}
 		}
 	});
-	
-})	
+
+})
 
 
 // executed anytime a new file has been changed/create1d/deleted
+
 function reactToChange(event, _path, stats) {
 
 	// convert full path (Users\baseDir\myFile.js) to (\baseDir\myFile.js)... 
-	_path = _path.replace(new RegExp('(' + (__dirname.replace( /\//g, '\\/')) + ')', 'g'), "");
+	_path = _path.replace(new RegExp('(' + (__dirname.replace(/\//g, '\\/')) + ')', 'g'), "");
 
-	Repo.update({ 'name': commander.repo }, {$push : {files : {isEdited : false, name: _path}}}, function(err) {
+	Repo.update({
+		'name': commander.repo
+	}, {
+		$push: {
+			files: {
+				isEdited: false,
+				name: _path
+			}
+		}
+	}, function(err) {
 		if (err) console.log(err);
 	})
 
 }
-
-
-
-	
