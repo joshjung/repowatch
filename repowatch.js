@@ -5,13 +5,14 @@ var versionInfo = require('./package.json'),
  	mongodb = require('./lib/db').db;
 
 require('./lib/models/repo.js');
-var RepoModel = mongoose.model("Repo");
 
 commander
 	.usage("repowatch [options] (default repo is taken from the current folder)")
 	.version(versionInfo.version)
 	.option('-r, --repo [repo]', 'The name of the repo to be watched.', null)
 	.parse(process.argv);
+
+var Repo = null;
 
 // require the repo option
 if (!commander.repo) { 
@@ -25,42 +26,31 @@ var workingRepo = null;
 // start watching files when we've connected to the mongo db.
 mongodb.connection.once("open", function() {
 
-	// check for existence of a repo by this name
-	RepoModel.count({"name": commander.repo}, function(err, count) {
-		
-		if (err) {console.log("Error finding if the current repo is in the database" + err); return }
+	Repo = mongoose.model("Repo");
 
-		// if doesn't exist, create a new document for it.  or else find the existing one and get its id.
-		if (count==0) {
-			currentRepo = new RepoModel({name: commander.repo })
-			currentRepo.save(startWatcher);
-		} else {
-			RepoModel.findOne({"name": commander.repo}, startWatcher)
+	Repo.findOne({ 'name': commander.repo }, function(err, repo) {
+		if (err) console.log(err);
+		else {
+			if (repo) {
+				chokidar.watch(__dirname, {persistent: true}).on('all', reactToChange);
+			}
+			else {
+				var currentRepo = new Repo({ 'name' : commander.repo }).save(function(err, repo) {
+					chokidar.watch(__dirname, {ignored: /node_modules/, persistent: true}).on('all', reactToChange);
+				});
+			}
 		}
 	});
 	
 })	
 
-// executed after connection to db and collection for the repo is made/found
-function startWatcher(err, repo) {
-	workingRepo = repo;
-	console.log('Watching repo %s ...', commander.repo);
-	chokidar.watch(__dirname, {ignored: /node_modules/, persistent: true}).on('all', reactToChange);
-}
 
-// executed anytime a new file has been changed/created/deleted
+// executed anytime a new file has been changed/create1d/deleted
 function reactToChange(event, path, stats) {
-
-	// diff file with repo and set meta data tags
-	// save file meta data to db.
-
-	RepoModel.findById(workingRepo, "name files", function(err, repo) {
+	Repo.findOne( { 'name': commander.repo } , function(err, repo) {
 		console.log(repo)
-
-		repo.files = ["hi"];
-
-	});
-
+	})
+	Repo.update({ 'name': commander.repo }, {$set : {"isEdited" : true}})
 }
 
 
